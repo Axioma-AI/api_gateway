@@ -6,3 +6,4 @@ pydantic-settings==2.10.1  # Gestión de configuración y .env
 python-dotenv==1.1.1       # Soporte para archivos .env
 httpx==0.28.1              # Cliente HTTP asíncrono
 coloredlogs==15.0.1        # Logs en color en la consola
+typing-extensions==4.14.0  # Backport de nuevas características de typing
