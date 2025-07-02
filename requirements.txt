@@ -1,0 +1,8 @@
+fastapi==0.115.14          # Framework ASGI de alto rendimiento
+uvicorn==0.35.0            # Servidor ASGI recomendado para FastAPI
+starlette==0.46.0          # Capa ASGI subyacente de FastAPI
+pydantic==2.11.7           # Validación de datos basada en type hints
+pydantic-settings==2.10.1  # Gestión de configuración y .env
+python-dotenv==1.1.1       # Soporte para archivos .env
+httpx==0.28.1              # Cliente HTTP asíncrono
+coloredlogs==15.0.1        # Logs en color en la consola
