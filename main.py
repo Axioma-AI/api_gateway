@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
-from src.routers.auth import router as auth_router
-from src.routers.articles import router as articles_router
-from src.routers.sources import router as sources_router
+from src.routes.auth import router as auth_router
+from src.routes.articles import router as articles_router
+from src.routes.sources import router as sources_router
 from src.config.settings import get_settings
 from src.utils.logger import setup_logger
 

@@ -1,10 +1,9 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
 
 class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
+    idToken: str
 
 class UpdateProfileRequest(BaseModel):
-    email: EmailStr
-    name: Optional[str] = None
+    displayName: Optional[str] = None
+    photoUrl: Optional[str] = None
