@@ -1,52 +1,158 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from typing import Optional, List
+from datetime import date
+from pydantic import BaseModel
 from src.dependencies.auth import require_token
-from src.schema.response_schema import ArticleResponse
 from src.services.axioma_service import AxiomaService
+from src.schema.article_models import (
+    ArticleResponseModel, 
+    ArticlePageCountResponseModel, 
+    ArticleAIResponseModel,
+    AIRequestIDs
+)
 
 router = APIRouter(
     prefix="/gateway/articles",
-    tags=["articles"],
-    dependencies=[Depends(require_token)]  # ✅ Se aplica a todos los endpoints
+    tags=["Articles"],
+    dependencies=[Depends(require_token)]
 )
+
 service = AxiomaService()
 
-@router.get("")
+@router.get("/getArticles", response_model=List[ArticleResponseModel])
 async def get_articles(
-    page: int = Query(1, ge=1),
-    start_date: Optional[str] = Query(None),
-    end_date: Optional[str] = Query(None)
+    page: int = Query(default=1, ge=1, description="Número de página (50 resultados por página)"),
+    start_date: Optional[date] = Query(
+        default=None,
+        description="Fecha de inicio en formato YYYY-MM-DD (por defecto: hoy)"
+    ),
+    end_date: Optional[date] = Query(
+        default=None,
+        description="Fecha de fin en formato YYYY-MM-DD (por defecto: hoy)"
+    )
 ):
-    return await service.get_articles(page=page, start_date=start_date, end_date=end_date)
+    """
+    Obtiene artículos con paginación y filtros de fecha.
+    Equivalente a GET /getArticles del servicio original.
+    """
+    # Convertir dates a strings si es necesario
+    start_date_str = start_date.isoformat() if start_date else None
+    end_date_str = end_date.isoformat() if end_date else None
+    
+    return await service.get_articles(
+        page=page, 
+        start_date=start_date_str, 
+        end_date=end_date_str
+    )
 
-@router.get("/search")
-async def search_articles(
-    token: str = Depends(require_token),
+@router.get("/search_text", response_model=List[ArticleResponseModel])
+async def search_articles_by_text(
+    query: str = Query(..., description="Texto a buscar en título o contenido (modo booleano)"),
+    page: int = Query(default=1, ge=1, description="Número de página (50 resultados por página)"),
+    start_date: Optional[date] = Query(default=None, description="Fecha de inicio (YYYY-MM-DD)"),
+    end_date: Optional[date] = Query(default=None, description="Fecha de fin (YYYY-MM-DD)")
+):
+    """
+    Busca artículos por texto en título o contenido.
+    Equivalente a GET /search_text del servicio original.
+    """
+    # Convertir dates a strings si es necesario
+    start_date_str = start_date.isoformat() if start_date else None
+    end_date_str = end_date.isoformat() if end_date else None
+    
+    return await service.search_articles_by_text(
+        query=query,
+        page=page,
+        start_date=start_date_str,
+        end_date=end_date_str
+    )
+
+@router.get("/getArticlePages", response_model=ArticlePageCountResponseModel)
+async def get_article_pages(
+    start_date: Optional[date] = Query(default=None, description="Formato: YYYY-MM-DD"),
+    end_date: Optional[date] = Query(default=None, description="Formato: YYYY-MM-DD")
+):
+    """
+    Obtiene el número total de páginas disponibles.
+    Equivalente a GET /getArticlePages del servicio original.
+    """
+    # Convertir dates a strings si es necesario
+    start_date_str = start_date.isoformat() if start_date else None
+    end_date_str = end_date.isoformat() if end_date else None
+    
+    return await service.get_article_pages(
+        start_date=start_date_str,
+        end_date=end_date_str
+    )
+
+@router.get("/aiArticlesQuery", response_model=List[ArticleAIResponseModel])
+async def get_ai_articles_by_query_ids(
+    ids: List[int] = Query(..., description="IDs de análisis de IA a consultar")
+):
+    """
+    Obtiene artículos procesados por IA basándose en IDs.
+    Equivalente a GET /aiArticlesQuery del servicio original.
+    """
+    if not ids:
+        raise HTTPException(status_code=400, detail="Lista de IDs no puede estar vacía")
+    
+    return await service.get_ai_articles_by_ids(ids)
+
+@router.get("/{article_id}", response_model=ArticleResponseModel)
+async def get_article_by_id(
+    article_id: int
+):
+    """
+    Obtiene un artículo específico por ID.
+    Equivalente a GET /{article_id} del servicio original.
+    """
+    return await service.get_article_by_id(article_id)
+
+# Endpoints legacy/alternativos (mantener por compatibilidad)
+@router.get("/search", response_model=List[ArticleResponseModel])
+async def search_articles_legacy(
     query: str = Query(...),
     page: int = Query(1, ge=1),
     start_date: Optional[str] = Query(None),
     end_date: Optional[str] = Query(None)
 ):
-    return await service.search_articles(token, query, page=page, start_date=start_date, end_date=end_date)
+    """
+    Endpoint de búsqueda legacy (mantener por compatibilidad).
+    """
+    return await service.search_articles_by_text(
+        query=query, 
+        page=page, 
+        start_date=start_date, 
+        end_date=end_date
+    )
 
-@router.get("/pages")
-async def article_pages(
-    token: str = Depends(require_token),
+@router.get("/pages", response_model=ArticlePageCountResponseModel)
+async def article_pages_legacy(
     start_date: Optional[str] = Query(None),
     end_date: Optional[str] = Query(None)
 ):
-    return await service.get_article_pages(token, start_date=start_date, end_date=end_date)
+    """
+    Endpoint de páginas legacy (mantener por compatibilidad).
+    """
+    return await service.get_article_pages(
+        start_date=start_date, 
+        end_date=end_date
+    )
 
-@router.get("/ai")
-async def articles_ai(
-    token: str = Depends(require_token),
+@router.get("/ai", response_model=List[ArticleAIResponseModel])
+async def articles_ai_legacy(
     ids: List[int] = Query(...)
 ):
-    return await service.get_ai_articles_by_ids(token, ids)
+    """
+    Endpoint de IA legacy (mantener por compatibilidad).
+    """
+    return await service.get_ai_articles_by_ids(ids)
 
-@router.get("/{article_id}")
-async def article_by_id(
-    article_id: int,
-    token: str = Depends(require_token)
+@router.post("/ai", response_model=List[ArticleAIResponseModel])
+async def articles_ai_post(
+    request: AIRequestIDs
 ):
-    return await service.get_article_by_id(token, article_id)
+    """
+    Versión POST para obtener artículos de IA (para listas grandes de IDs).
+    """
+    return await service.get_ai_articles_by_ids(request.ids)
