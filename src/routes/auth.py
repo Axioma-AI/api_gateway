@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
-from src.schema.auth_schema import LoginRequest, UpdateProfileRequest
-from src.schema.response_schema import TokenResponse, UserResponse
+from src.schema.auth_models import LoginRequest, UpdateProfileRequest
 from src.dependencies.auth import require_token
 from src.services.auth_service import AuthService
 
@@ -9,7 +8,7 @@ service = AuthService()
 
 @router.post("/login")
 async def login(request: LoginRequest):
-    return await service.login(request.dict())
+    return await service.login(request.model_dump())
 
 @router.put("/profile")
 async def update_profile(
