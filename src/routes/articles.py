@@ -1,14 +1,15 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from typing import Optional, List
 from datetime import date
-from pydantic import BaseModel
 from src.dependencies.auth import require_token
 from src.services.axioma_service import AxiomaService
 from src.schema.article_models import (
     ArticleResponseModel, 
     ArticlePageCountResponseModel, 
     ArticleAIResponseModel,
-    AIRequestIDs
+    AIRequestIDs,
+    NewsFavoritesCoreRequest,
+    UpdateFavoritesResponse
 )
 
 router = APIRouter(
@@ -18,6 +19,36 @@ router = APIRouter(
 )
 
 service = AxiomaService()
+
+@router.get("/favorite")
+async def get_favorites(
+    page: int = Query(1, ge=1, description="Número de página para paginación"),
+    token: str = Depends(require_token)
+):
+    """
+    Versión POST para obtener artículos de IA (para listas grandes de IDs).
+    """
+    return await service.get_favorites(page, token)
+
+@router.post("/favorite", response_model = UpdateFavoritesResponse)
+async def add_favorite(
+    newFavorite: NewsFavoritesCoreRequest,
+    token: str = Depends(require_token)
+):
+    """
+    Versión POST para obtener artículos de IA (para listas grandes de IDs).
+    """
+    return await service.add_favorite(newFavorite, token)
+
+@router.delete("/favorite", response_model = UpdateFavoritesResponse)
+async def delete_favorite(
+    newFavorite: NewsFavoritesCoreRequest, 
+    token: str = Depends(require_token)
+):
+    """
+    Versión POST para obtener artículos de IA (para listas grandes de IDs).
+    """
+    return await service.delete_favorite(newFavorite, token)
 
 @router.get("/getArticles", response_model=List[ArticleResponseModel])
 async def get_articles(

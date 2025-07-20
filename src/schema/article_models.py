@@ -75,3 +75,10 @@ class ArticleAIResponseModel(BaseModel):
 # Modelo para la petición de IDs de AI
 class AIRequestIDs(BaseModel):
     ids: List[int]
+
+class NewsFavoritesCoreRequest(BaseModel):
+    newsCoreId: int
+
+class UpdateFavoritesResponse(BaseModel):
+    newsCoreId: int
+    message: str

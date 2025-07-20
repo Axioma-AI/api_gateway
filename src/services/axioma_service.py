@@ -1,3 +1,4 @@
+from src.schema.article_models import NewsFavoritesCoreRequest
 from src.utils.http_client import HTTPClient
 from src.config.settings import get_settings
 
@@ -69,4 +70,22 @@ class AxiomaService:
     async def search_country(self, name: str) -> dict:
         url = f"{settings.axioma_service_url}/api/v1/countries/search"
         resp = await http_client.request("GET", url, params={"name": name})
+        return resp.json()
+    
+    async def get_favorites(self, page: int, token) -> dict:
+        url = f"{settings.axioma_service_url}/api/v1/favorites"
+        headers = {"Authorization": f"Bearer {token}"}
+        resp = await http_client.request("GET", url, params={"page": page}, headers=headers)
+        return resp.json()
+    
+    async def add_favorite(self, newFavorite: NewsFavoritesCoreRequest, token: str) -> dict:
+        url = f"{settings.auth_service_url}/favorite-news"
+        headers = {"Authorization": f"Bearer {token}"}
+        resp = await http_client.request("POST", url, json=newFavorite.model_dump(), headers=headers)
+        return resp.json()
+    
+    async def delete_favorite(self, newFavorite: NewsFavoritesCoreRequest, token: str) -> dict:
+        url = f"{settings.auth_service_url}/favorite-news"
+        headers = {"Authorization": f"Bearer {token}"}
+        resp = await http_client.request("DELETE", url, json=newFavorite.model_dump(),  headers=headers)
         return resp.json()
