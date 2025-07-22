@@ -89,3 +89,22 @@ class AxiomaService:
         headers = {"Authorization": f"Bearer {token}"}
         resp = await http_client.request("DELETE", url, json=newFavorite.model_dump(),  headers=headers)
         return resp.json()
+    
+    async def get_interests(self, token: str) -> dict:
+        """
+        Obtiene todos los interests del usuario autenticado.
+        """
+        url = f"{settings.axioma_service_url}/api/v1/interests"
+        headers = {"Authorization": f"Bearer {token}"}
+        resp = await http_client.request("GET", url, headers=headers)
+        return resp.json()
+    
+    async def add_interest(self, keyword: str, token: str) -> dict:
+        """
+        Añade un nuevo interest al usuario autenticado.
+        """
+        url = f"{settings.auth_service_url}/interests-user"
+        headers = {"Authorization": f"Bearer {token}"}
+        params = {"keyword": keyword}
+        resp = await http_client.request("POST", url, params=params, headers=headers)
+        return resp.json()

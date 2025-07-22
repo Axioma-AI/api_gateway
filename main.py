@@ -5,6 +5,7 @@ from fastapi.openapi.utils import get_openapi
 from src.routes.auth import router as auth_router
 from src.routes.articles import router as articles_router
 from src.routes.sources import router as sources_router
+from src.routes.interests import router as interests_router
 from src.config.settings import get_settings
 from src.utils.logger import setup_logger
 
@@ -27,6 +28,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(articles_router)
 app.include_router(sources_router)
+app.include_router(interests_router)
 
 
 def custom_openapi():
