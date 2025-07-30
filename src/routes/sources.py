@@ -61,3 +61,33 @@ async def search_country_by_name(
         raise HTTPException(status_code=404, detail="No results found.")
     
     return result
+
+@router.get("/countries/{country_id}", response_model=CountryResponseModel)
+async def get_country_by_id(country_id: int):
+    """
+    Obtiene un país específico por su ID.
+    """
+    try:
+        country = await service.get_country_by_id(country_id)
+        if not country:
+            raise HTTPException(status_code=404, detail="Country not found.")
+        return country
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error.")
+
+@router.get("/{source_id}", response_model=SourceResponseModel)
+async def get_source_by_id(source_id: int):
+    """
+    Obtiene una fuente específica por su ID.
+    """
+    try:
+        source = await service.get_source_by_id(source_id)
+        if not source:
+            raise HTTPException(status_code=404, detail="Source not found.")
+        return source
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error.")

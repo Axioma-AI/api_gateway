@@ -116,6 +116,16 @@ async def get_article_pages(
         end_date=end_date_str
     )
 
+@router.get("/recommended", response_model=List[ArticleResponseModel])
+async def get_recommended_articles():
+    """
+    Obtiene 5 artículos recomendados aleatorios de hoy o ayer si no hay artículos de hoy.
+    Retorna 5 artículos aleatorios que se refrescan en cada petición.
+    """
+    return await service.get_recommended_articles()
+
+
+
 @router.get("/aiArticlesQuery", response_model=List[ArticleAIResponseModel])
 async def get_ai_articles_by_query_ids(
     ids: List[int] = Query(..., description="IDs de análisis de IA a consultar")

@@ -1,10 +1,11 @@
 from typing import Optional, List
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 # Modelos base
 class SourceModel(BaseModel):
     id: int
     name: str
+    logo_url: Optional[HttpUrl] = Field(None, example="https://eldeber.com.bo/logo.png")
 
 class AICategoryModel(BaseModel):
     id: int
@@ -37,7 +38,7 @@ class ArticleResponseModel(BaseModel):
     model_config = ConfigDict(from_attributes=True, json_schema_extra={
         "example": {
             "id": 10234,
-            "source": {"id": 5, "name": "BBC News"},
+            "source": {"id": 5, "name": "BBC News", "logo_url": "https://bbc.com/logo.png"},
             "author": "Jane Doe",
             "title": "Economic growth shows signs of recovery",
             "description": "The latest economic data shows signs of growth...",

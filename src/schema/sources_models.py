@@ -7,6 +7,7 @@ class SourceResponseModel(BaseModel):
     url: Optional[HttpUrl] = Field(None, example="https://eldeber.com.bo")
     logo_url: Optional[HttpUrl] = Field(None, example="https://eldeber.com.bo/logo.png")
     description: Optional[str] = Field(None, example="Periódico boliviano con noticias actualizadas")
+    country_id: Optional[int] = Field(None, example=1)
     country_name: Optional[str] = Field(None, example="Bolivia")
 
     class Config:
