@@ -124,7 +124,24 @@ async def get_recommended_articles():
     """
     return await service.get_recommended_articles()
 
-
+@router.get("/search_by_source", response_model=List[ArticleResponseModel])
+async def search_articles_by_source(
+    source_id: int = Query(..., description="ID de la fuente de noticias"),
+    query: str = Query(default=None, description="Texto a buscar en título o contenido (opcional)"),
+    page: int = Query(default=1, ge=1, description="Número de página (50 resultados por página)"),
+    start_date: Optional[date] = Query(default=None, description="Fecha de inicio (YYYY-MM-DD)"),
+    end_date: Optional[date] = Query(default=None, description="Fecha de fin (YYYY-MM-DD)"),
+):
+    """
+    Versión POST para obtener artículos de IA (para listas grandes de IDs).
+    """
+    return await service.search_articles_by_source(
+            source_id = source_id, 
+            query = query, 
+            page = page,
+            start_date = start_date,
+            end_date = end_date
+        )
 
 @router.get("/aiArticlesQuery", response_model=List[ArticleAIResponseModel])
 async def get_ai_articles_by_query_ids(

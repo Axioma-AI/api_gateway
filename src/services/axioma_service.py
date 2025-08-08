@@ -1,3 +1,5 @@
+from datetime import date
+from typing import Optional
 from src.schema.article_models import NewsFavoritesCoreRequest
 from src.utils.http_client import HTTPClient
 from src.config.settings import get_settings
@@ -133,4 +135,30 @@ class AxiomaService:
         """
         url = f"{settings.axioma_service_url}/api/v1/sources/countries/{country_id}"
         resp = await http_client.request("GET", url)
+        return resp.json()
+    
+    async def search_articles_by_source(
+        self,
+        source_id: int,
+        query: Optional[str] = None,
+        page: int = 1,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+    ) -> dict:
+        """
+        Busca artículos por fuente de noticias.
+        """
+        url = f"{settings.axioma_service_url}/api/v1/articles/search_by_source"
+
+        params = {
+            "source_id": source_id,
+            "query": query,
+            "page": page,
+            "start_date": start_date.isoformat() if start_date else None,
+            "end_date": end_date.isoformat() if end_date else None,
+        }
+
+        params = {k: v for k, v in params.items() if v is not None}
+
+        resp = await http_client.request("GET", url, params=params)
         return resp.json()
