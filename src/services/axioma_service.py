@@ -81,13 +81,13 @@ class AxiomaService:
         return resp.json()
     
     async def add_favorite(self, newFavorite: NewsFavoritesCoreRequest, token: str) -> dict:
-        url = f"{settings.auth_service_url}/favorite-news"
+        url = f"{settings.auth_service_url}/api/v1/favorite-news"
         headers = {"Authorization": f"Bearer {token}"}
         resp = await http_client.request("POST", url, json=newFavorite.model_dump(), headers=headers)
         return resp.json()
     
     async def delete_favorite(self, newFavorite: NewsFavoritesCoreRequest, token: str) -> dict:
-        url = f"{settings.auth_service_url}/favorite-news"
+        url = f"{settings.auth_service_url}/api/v1/favorite-news"
         headers = {"Authorization": f"Bearer {token}"}
         resp = await http_client.request("DELETE", url, json=newFavorite.model_dump(),  headers=headers)
         return resp.json()
@@ -106,7 +106,7 @@ class AxiomaService:
         """
         Añade un nuevo interest al usuario autenticado.
         """
-        url = f"{settings.auth_service_url}/interests-user"
+        url = f"{settings.auth_service_url}/api/v1/interests-user"
         headers = {"Authorization": f"Bearer {token}"}
         params = {"keyword": keyword}
         resp = await http_client.request("POST", url, params=params, headers=headers)

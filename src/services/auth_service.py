@@ -8,7 +8,7 @@ http_client = HTTPClient(timeout=settings.timeout)
 
 class AuthService:
     async def login(self, data: dict) -> dict:
-        url = f"{settings.auth_service_url}/auth/login"
+        url = f"{settings.auth_service_url}/api/v1/auth/login"
         try:
             resp = await http_client.request("POST", url, json=data)
             return resp.json()
@@ -18,7 +18,7 @@ class AuthService:
             raise HTTPException(status_code=code, detail=detail)
 
     async def update(self, data: dict, token: str) -> dict:
-        url = f"{settings.auth_service_url}/user/profile"
+        url = f"{settings.auth_service_url}/api/v1/user/profile"
         headers = {"Authorization": f"Bearer {token}"}
         try:
             resp = await http_client.request("PUT", url, json=data, headers=headers)
@@ -29,7 +29,7 @@ class AuthService:
             raise HTTPException(status_code=code, detail=detail)
 
     async def get_profile(self, token: str) -> dict:
-        url = f"{settings.auth_service_url}/user/profile"
+        url = f"{settings.auth_service_url}/api/v1/user/profile"
         headers = {"Authorization": f"Bearer {token}"}
         try:
             resp = await http_client.request("GET", url, headers=headers)
