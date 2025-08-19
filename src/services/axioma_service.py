@@ -96,8 +96,7 @@ class AxiomaService:
         """
         Obtiene todos los interests del usuario autenticado.
         """
-        http_client = HTTPClient(timeout=30.0)
-        url = f"{settings.axioma_service_url}/api/v1/interests"
+        url = f"{settings.auth_service_url}/api/v1/interests-user"
         headers = {"Authorization": f"Bearer {token}"}
         resp = await http_client.request("GET", url, headers=headers)
         return resp.json()
