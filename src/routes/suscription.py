@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Query, Body, status
 from typing import Dict, Any, Optional
+from schema.suscriptions_models import CreateSubscriptionRequest
 from src.services.auth_service import AuthService
 
 router = APIRouter(
@@ -17,7 +18,7 @@ service = AuthService()
     status_code=status.HTTP_200_OK,
 )
 async def create_subscription(
-    payload: Dict[str, Any] = Body(...),
+    payload: CreateSubscriptionRequest,
     token: str = Query(..., description="User authentication token"),
 ):
     """
