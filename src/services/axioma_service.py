@@ -161,3 +161,25 @@ class AxiomaService:
 
         resp = await http_client.request("GET", url, params=params)
         return resp.json()
+
+    async def get_interests_by_interest(
+        self,
+        interest: str,
+        page: int = 1,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None
+    ) -> dict:
+        """
+        Search articles by interest term with pagination and date filters.
+        """
+        url = f"{settings.axioma_service_url}/api/v1/by-interest"
+        params = {
+            "interest": interest,
+            "page": page,
+            "start_date": start_date.isoformat() if start_date else None,
+            "end_date": end_date.isoformat() if end_date else None,
+        }
+        # Remove None values
+        params = {k: v for k, v in params.items() if v is not None}
+        resp = await http_client.request("GET", url, params=params)
+        return resp.json()
