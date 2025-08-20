@@ -76,6 +76,25 @@ async def get_articles(
         end_date=end_date_str
     )
 
+@router.get("/by-interest")
+async def get_interests_by_interest(
+    interest: str = Query(..., description="Término de interés a buscar en título o contenido"),
+    page: int = Query(default=1, ge=1, description="Número de página (50 resultados por página)"),
+    start_date: Optional[date] = Query(default=None, description="Fecha de inicio (YYYY-MM-DD)"),
+    end_date: Optional[date] = Query(default=None, description="Fecha de fin (YYYY-MM-DD)")
+):
+    """
+    Search articles by interest term with pagination and date filters
+    
+    - **interest**: Interest term to search in title or content
+    - **page**: Page number for pagination (50 articles per page)
+    - **start_date**: Start date filter (YYYY-MM-DD format)
+    - **end_date**: End date filter (YYYY-MM-DD format)
+    
+    Returns a list of articles matching the interest term
+    """
+    return await service.get_interests_by_interest(interest=interest, page=page, start_date=start_date, end_date=end_date)
+
 @router.get("/search_text", response_model=List[ArticleResponseModel])
 async def search_articles_by_text(
     query: str = Query(..., description="Texto a buscar en título o contenido (modo booleano)"),
