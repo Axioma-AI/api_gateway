@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Query, Body, status
 from typing import Dict, Any, Optional
-from schema.suscriptions_models import CreateSubscriptionRequest
+from src.schema.suscriptions_models import CreateSubscriptionRequest
 from src.services.auth_service import AuthService
 
 router = APIRouter(
