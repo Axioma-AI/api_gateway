@@ -8,6 +8,7 @@ logger = setup_logger(__name__, level=logging.DEBUG)
 class Settings(BaseSettings):
     auth_service_url: str = "http://localhost:4000"
     axioma_service_url: str = "http://localhost:8000"
+    suscription_service_url: str = "http://localhost:5000"  # Default URL for service endpoints
     timeout: int = 120
     debug: bool = True
 
