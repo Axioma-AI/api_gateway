@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from fastapi import HTTPException
 from src.utils.http_client import HTTPClient
 from src.config.settings import get_settings
@@ -38,3 +39,51 @@ class AuthService:
             code = exc.response.status_code
             detail = exc.response.json()
             raise HTTPException(status_code=code, detail=detail)
+        
+    async def create_subscription(self, token: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{settings.auth_service_url}/api/v1/subscriptions"
+        headers = {"Authorization": f"Bearer {token}"}
+        try:
+            resp = await http_client.request("POST", url, json=data, headers=headers)
+            return resp.json()
+        except httpx.HTTPStatusError as exc:
+            raise HTTPException(
+                status_code=exc.response.status_code,
+                detail=exc.response.json()
+            )
+
+    async def verify_subscription(self, token: str) -> Dict[str, Any]:
+        url = f"{settings.auth_service_url}/api/v1/subscriptions/verify"
+        headers = {"Authorization": f"Bearer {token}"}
+        try:
+            resp = await http_client.request("GET", url, headers=headers)
+            return resp.json()
+        except httpx.HTTPStatusError as exc:
+            raise HTTPException(
+                status_code=exc.response.status_code,
+                detail=exc.response.json()
+            )
+
+    async def cancel_subscription(self, token: str) -> Dict[str, Any]:
+        url = f"{settings.auth_service_url}/api/v1/subscriptions/cancel"
+        headers = {"Authorization": f"Bearer {token}"}
+        try:
+            resp = await http_client.request("POST", url, headers=headers)
+            return resp.json()
+        except httpx.HTTPStatusError as exc:
+            raise HTTPException(
+                status_code=exc.response.status_code,
+                detail=exc.response.json()
+            )
+
+    async def verify_receipt(self, token: str, receipt_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{settings.auth_service_url}/api/v1/subscriptions/verify-receipt"
+        headers = {"Authorization": f"Bearer {token}"}
+        try:
+            resp = await http_client.request("POST", url, json=receipt_data, headers=headers)
+            return resp.json()
+        except httpx.HTTPStatusError as exc:
+            raise HTTPException(
+                status_code=exc.response.status_code,
+                detail=exc.response.json()
+            )
