@@ -81,13 +81,13 @@ class AxiomaService:
         return resp.json()
     
     async def add_favorite(self, newFavorite: NewsFavoritesCoreRequest, token: str) -> dict:
-        url = f"{settings.auth_service_url}/favorite-news"
+        url = f"{settings.auth_service_url}/api/v1/favorite-news"
         headers = {"Authorization": f"Bearer {token}"}
         resp = await http_client.request("POST", url, json=newFavorite.model_dump(), headers=headers)
         return resp.json()
     
     async def delete_favorite(self, newFavorite: NewsFavoritesCoreRequest, token: str) -> dict:
-        url = f"{settings.auth_service_url}/favorite-news"
+        url = f"{settings.auth_service_url}/api/v1/favorite-news"
         headers = {"Authorization": f"Bearer {token}"}
         resp = await http_client.request("DELETE", url, json=newFavorite.model_dump(),  headers=headers)
         return resp.json()
@@ -96,8 +96,7 @@ class AxiomaService:
         """
         Obtiene todos los interests del usuario autenticado.
         """
-        http_client = HTTPClient(timeout=30.0)
-        url = f"{settings.axioma_service_url}/api/v1/interests"
+        url = f"{settings.auth_service_url}/api/v1/interests-user"
         headers = {"Authorization": f"Bearer {token}"}
         resp = await http_client.request("GET", url, headers=headers)
         return resp.json()
@@ -106,7 +105,7 @@ class AxiomaService:
         """
         Añade un nuevo interest al usuario autenticado.
         """
-        url = f"{settings.auth_service_url}/interests-user"
+        url = f"{settings.auth_service_url}/api/v1/interests-user"
         headers = {"Authorization": f"Bearer {token}"}
         params = {"keyword": keyword}
         resp = await http_client.request("POST", url, params=params, headers=headers)
@@ -160,5 +159,27 @@ class AxiomaService:
 
         params = {k: v for k, v in params.items() if v is not None}
 
+        resp = await http_client.request("GET", url, params=params)
+        return resp.json()
+
+    async def get_interests_by_interest(
+        self,
+        interest: str,
+        page: int = 1,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None
+    ) -> dict:
+        """
+        Search articles by interest term with pagination and date filters.
+        """
+        url = f"{settings.axioma_service_url}/api/v1/by-interest"
+        params = {
+            "interest": interest,
+            "page": page,
+            "start_date": start_date.isoformat() if start_date else None,
+            "end_date": end_date.isoformat() if end_date else None,
+        }
+        # Remove None values
+        params = {k: v for k, v in params.items() if v is not None}
         resp = await http_client.request("GET", url, params=params)
         return resp.json()
