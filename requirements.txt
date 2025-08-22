@@ -12,3 +12,4 @@ pydantic==2.11.7           # Validación de datos basada en type hints
 pydantic-settings==2.10.1  # Gestión de configuración y .env
 httpx==0.28.1              # Cliente HTTP asíncrono
 coloredlogs==15.0.1        # Logs en color en la consola
+python-dotenv>=0.21.0
