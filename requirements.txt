@@ -3,6 +3,7 @@ uvicorn==0.35.0            # Servidor ASGI recomendado para FastAPI
 starlette==0.46.0          # Capa ASGI subyacente de FastAPI (requerida por FastAPI)
 typing-extensions==4.14.0  # Extensiones de typing (requerida por FastAPI/Pydantic)
 click>=7.0                 # Interfaz de línea de comandos (requerida por uvicorn)
+h11>=0.8                   # Protocolo HTTP/1.1 (requerida por uvicorn)
 pydantic==2.11.7           # Validación de datos basada en type hints
 pydantic-settings==2.10.1  # Gestión de configuración y .env
 httpx==0.28.1              # Cliente HTTP asíncrono
