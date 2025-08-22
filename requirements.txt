@@ -16,3 +16,4 @@ idna                       # Nombres de dominio internacionalizados (requerida p
 httpx==0.28.1              # Cliente HTTP asíncrono
 coloredlogs==15.0.1        # Logs en color en la consola
 python-dotenv>=0.21.0
+humanfriendly>=9.1
