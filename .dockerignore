@@ -1,48 +1,78 @@
-# Python
+# Python cache y compilados
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Entornos virtuales
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
+.venv/
 
-# IDE
+# IDE y editores
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.vim/
 
-# OS
+# Sistema operativo
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Git
+# Control de versiones
 .git/
 .gitignore
+.gitattributes
 
-# Docker
-Dockerfile*
-docker-compose*
+# Docker (excluir archivos de desarrollo)
+docker-compose.dev.yml
 .dockerignore
 
-# Documentation
+# Documentación y desarrollo
 README.md
 *.md
+!.env.example
 
-# Logs
+# Logs y temporales
+logs/
 *.log
+*.tmp
+*.temp
 
-# Testing
+# Testing y coverage
 .pytest_cache/
 .coverage
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
 
-# Environment
+# Archivos de entorno específicos
 .env
+.env.local
+.env.*.local
 
-# Temporary
-*.tmp
+# Archivos de build y distribución
+build/
+dist/
+*.egg-info/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
