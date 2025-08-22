@@ -5,6 +5,7 @@ typing-extensions==4.14.0  # Extensiones de typing (requerida por FastAPI/Pydant
 click>=7.0                 # Interfaz de línea de comandos (requerida por uvicorn)
 h11>=0.8                   # Protocolo HTTP/1.1 (requerida por uvicorn)
 anyio>=3.6.2,<5            # Biblioteca de concurrencia asíncrona (requerida por starlette)
+annotated-types>=0.6.0     # Tipos anotados (requerida por pydantic)
 pydantic==2.11.7           # Validación de datos basada en type hints
 pydantic-settings==2.10.1  # Gestión de configuración y .env
 httpx==0.28.1              # Cliente HTTP asíncrono
