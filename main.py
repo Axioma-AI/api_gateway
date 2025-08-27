@@ -7,6 +7,7 @@ from src.routes.articles import router as articles_router
 from src.routes.sources import router as sources_router
 from src.routes.interests import router as interests_router
 from src.routes.suscription import router as suscription_router
+from src.routes.analysis import router as analysis_router
 from src.config.settings import get_settings
 from src.utils.logger import setup_logger
 
@@ -31,6 +32,7 @@ app.include_router(articles_router)
 app.include_router(sources_router)
 app.include_router(interests_router)
 app.include_router(suscription_router)
+app.include_router(analysis_router)
 
 
 def custom_openapi():

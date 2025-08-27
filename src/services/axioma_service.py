@@ -183,3 +183,21 @@ class AxiomaService:
         params = {k: v for k, v in params.items() if v is not None}
         resp = await http_client.request("GET", url, params=params)
         return resp.json()
+
+    async def get_analysis(
+        self,
+        query: str,
+        interval: int,
+        unit: str
+    ) -> dict:
+        """
+        Realiza un análisis de sentimientos de noticias basado en una consulta de texto y un rango de tiempo específico.
+        """
+        url = f"{settings.axioma_service_url}/api/v1/analysis"
+        params = {
+            "query": query,
+            "interval": interval,
+            "unit": unit
+        }
+        resp = await http_client.request("GET", url, params=params)
+        return resp.json()
