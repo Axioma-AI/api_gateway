@@ -28,7 +28,7 @@ analysis_responses = {
 }
 
 @router.get(
-    "/analysis",
+    "/",
     response_model=AnalysisResponseModel,
     responses=analysis_responses,
     summary="Análisis de sentimientos de noticias",
