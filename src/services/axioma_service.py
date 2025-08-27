@@ -201,3 +201,13 @@ class AxiomaService:
         }
         resp = await http_client.request("GET", url, params=params)
         return resp.json()
+    
+    async def update_interests(self, interests: list[str], token: str) -> dict:
+        """
+        Actualiza los intereses del usuario autenticado.
+        """
+        url = f"{settings.auth_service_url}/api/v1/interests-user"
+        headers = {"Authorization": f"Bearer {token}"}
+        payload = {"interests": interests}
+        resp = await http_client.request("PUT", url, json=payload, headers=headers)
+        return resp.json()

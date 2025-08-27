@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Query
+from src.schema.interests_models import InterestsUpdateRequest
 from src.dependencies.auth import require_token
 from src.services.axioma_service import AxiomaService
 
@@ -45,3 +46,21 @@ async def add_interest(
     }
     """
     return await service.add_interest(keyword, token)
+
+@router.put("/")
+async def update_interests(
+    request: InterestsUpdateRequest,
+    token: str = Depends(require_token)
+):
+    """
+    Actualiza los intereses del usuario autenticado.
+
+    Parámetros:
+    - request: Objeto JSON con una clave "interests" que contiene la lista de intereses a actualizar.
+
+    Respuesta esperada:
+    {
+        "interests": ["TypeScript", "Firebase", "OpenAPI"]
+    }
+    """
+    return await service.update_interests(request.interests, token)
