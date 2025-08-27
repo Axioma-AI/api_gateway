@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     auth_service_url: str = "http://localhost:4000"
     axioma_service_url: str = "http://localhost:8000"
     suscription_service_url: str = "http://localhost:5000"  # Default URL for service endpoints
-    timeout: int = 120
+    timeout: int = 300
     debug: bool = True
 
     model_config = SettingsConfigDict(env_file=".env")
