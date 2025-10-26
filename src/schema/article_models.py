@@ -83,3 +83,65 @@ class NewsFavoritesCoreRequest(BaseModel):
 class UpdateFavoritesResponse(BaseModel):
     newsCoreId: int
     message: str
+
+class ChatMessage(BaseModel):
+    """Message in the conversation history"""
+    role: str = Field(
+        ...,
+        description="Role: 'user' or 'assistant'",
+        pattern="^(user|assistant)$"
+    )
+    content: str = Field(
+        ...,
+        description="Message content",
+        min_length=1
+    )
+
+
+class ChatRequest(BaseModel):
+    """Request to consult about a specific article"""
+    user_message: str = Field(
+        ...,
+        description="Current user question or message about the article",
+        min_length=1
+    )
+    history: Optional[List[ChatMessage]] = Field(
+        None,
+        description="Previous message history (optional, to continue conversation)"
+    )
+    temperature: float = Field(
+        0.7,
+        description="Temperature for generation (0.0 to 1.0)",
+        ge=0.0,
+        le=1.0
+    )
+
+    class Config:
+        json_schema_extra = {
+            "examples": [
+                {
+                    "name": "First consultation",
+                    "value": {
+                        "user_message": "What is this article about?",
+                        "temperature": 0.7
+                    }
+                },
+                {
+                    "name": "Conversation continuation",
+                    "value": {
+                        "user_message": "What is the economic impact?",
+                        "history": [
+                            {
+                                "role": "user",
+                                "content": "What is this article about?"
+                            },
+                            {
+                                "role": "assistant",
+                                "content": "This article is about the increase in inflation..."
+                            }
+                        ],
+                        "temperature": 0.7
+                    }
+                }
+            ]
+        }

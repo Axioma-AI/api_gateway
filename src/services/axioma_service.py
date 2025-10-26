@@ -1,6 +1,8 @@
 from datetime import date
-from typing import Optional
-from src.schema.article_models import NewsFavoritesCoreRequest
+import json
+from typing import Optional, AsyncIterator
+
+from src.schema.article_models import ChatRequest, NewsFavoritesCoreRequest
 from src.utils.http_client import HTTPClient
 from src.config.settings import get_settings
 
@@ -211,3 +213,41 @@ class AxiomaService:
         payload = {"interests": interests}
         resp = await http_client.request("PUT", url, json=payload, headers=headers)
         return resp.json()
+    
+    async def consult_article_stream(
+        self,
+        article_id: int,
+        chat_request: ChatRequest,
+        token: str,
+    ) -> AsyncIterator[bytes]:
+        """
+        Proxy streaming SSE hacia el servicio de artículos usando HTTPClient.stream.
+        Devuelve bytes listos para StreamingResponse (líneas terminadas en '\n').
+        """
+        url = f"{settings.axioma_service_url}/api/v1/articles/{article_id}/consult"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "text/event-stream",
+            "Cache-Control": "no-cache",
+        }
+
+        try:
+            first = True
+            async for status, line in http_client.stream(
+                "POST", url, headers=headers, json=chat_request.model_dump(), timeout=None
+            ):
+                if first:
+                    first = False
+                    if status is not None and status != 200:
+                        err = {"error": "Upstream error", "status": status}
+                        yield f"data: {json.dumps(err)}\n\n".encode("utf-8")
+                        return
+                    continue
+
+                if line is None:
+                    continue
+                yield (line + "\n").encode("utf-8")
+
+        except Exception as e:
+            err = {"error": f"Gateway SSE proxy error: {str(e)}"}
+            yield f"data: {json.dumps(err)}\n\n".encode("utf-8")

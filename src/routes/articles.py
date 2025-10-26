@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi.responses import StreamingResponse
 from typing import Optional, List
 from datetime import date
+
 from src.dependencies.auth import require_token
 from src.services.axioma_service import AxiomaService
 from src.schema.article_models import (
@@ -8,6 +10,7 @@ from src.schema.article_models import (
     ArticlePageCountResponseModel, 
     ArticleAIResponseModel,
     AIRequestIDs,
+    ChatRequest,
     NewsFavoritesCoreRequest,
     UpdateFavoritesResponse
 )
@@ -233,3 +236,23 @@ async def articles_ai_post(
     Versión POST para obtener artículos de IA (para listas grandes de IDs).
     """
     return await service.get_ai_articles_by_ids(request.ids)
+
+@router.post("/{article_id}/consult", response_class=StreamingResponse, summary="Consulta SSE de artículo (proxy)")
+async def consult_article_proxy(
+    article_id: int,
+    body: ChatRequest,
+    token: str = Depends(require_token),
+):
+    async def gen():
+        async for chunk in service.consult_article_stream(article_id, body, token):
+            yield chunk
+
+    return StreamingResponse(
+        gen(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
