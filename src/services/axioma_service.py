@@ -1,6 +1,8 @@
 from datetime import date
 import json
 from typing import Optional, AsyncIterator
+import httpx
+from fastapi import HTTPException
 
 from src.schema.article_models import ChatRequest, NewsFavoritesCoreRequest
 from src.utils.http_client import HTTPClient
@@ -10,6 +12,27 @@ settings = get_settings()
 http_client = HTTPClient(timeout=settings.timeout)
 
 class AxiomaService:
+    async def _request_json(
+        self,
+        method: str,
+        url: str,
+        *,
+        headers: Optional[dict] = None,
+        json: Optional[dict] = None,
+        params: Optional[dict] = None,
+    ) -> dict:
+        try:
+            resp = await http_client.request(method, url, headers=headers, json=json, params=params)
+            return resp.json()
+        except httpx.HTTPStatusError as exc:
+            code = exc.response.status_code
+            try:
+                detail = exc.response.json()
+            except Exception:
+                detail = exc.response.text
+            raise HTTPException(status_code=code, detail=detail)
+        except httpx.RequestError as exc:
+            raise HTTPException(status_code=502, detail=str(exc))
     async def get_articles(self, *, page: int = 1, start_date: str | None = None, end_date: str | None = None) -> dict:
         url = f"{settings.axioma_service_url}/api/v1/articles/getArticles"
         params = {"page": page}
@@ -17,8 +40,7 @@ class AxiomaService:
             params["start_date"] = start_date
         if end_date:
             params["end_date"] = end_date
-        resp = await http_client.request("GET", url, params=params)
-        return resp.json()
+        return await self._request_json("GET", url, params=params)
 
     async def search_articles_by_text(self, query: str, *, page: int = 1, start_date: str | None = None, end_date: str | None = None) -> dict:
         url = f"{settings.axioma_service_url}/api/v1/articles/search_text"
@@ -27,8 +49,7 @@ class AxiomaService:
             params["start_date"] = start_date
         if end_date:
             params["end_date"] = end_date
-        resp = await http_client.request("GET", url, params=params)
-        return resp.json()
+        return await self._request_json("GET", url, params=params)
 
     async def get_article_pages(self, *, start_date: str | None = None, end_date: str | None = None) -> dict:
         url = f"{settings.axioma_service_url}/api/v1/articles/getArticlePages"
@@ -37,24 +58,20 @@ class AxiomaService:
             params["start_date"] = start_date
         if end_date:
             params["end_date"] = end_date
-        resp = await http_client.request("GET", url, params=params)
-        return resp.json()
+        return await self._request_json("GET", url, params=params)
 
     async def get_article_by_id(self, article_id: int) -> dict:
         url = f"{settings.axioma_service_url}/api/v1/articles/{article_id}"
-        resp = await http_client.request("GET", url)
-        return resp.json()
+        return await self._request_json("GET", url)
 
     async def get_ai_articles_by_ids(self, ids: list[int]) -> dict:
         url = f"{settings.axioma_service_url}/api/v1/articles/aiArticlesQuery"
-        resp = await http_client.request("GET", url, params={"ids": ids})
-        return resp.json()
+        return await self._request_json("GET", url, params={"ids": ids})
 
     # Métodos para sources
     async def get_sources(self) -> dict:
         url = f"{settings.axioma_service_url}/api/v1/sources/"
-        resp = await http_client.request("GET", url)
-        return resp.json()
+        return await self._request_json("GET", url)
 
     async def search_sources(self, *, name: str | None = None, country: str | None = None) -> dict:
         url = f"{settings.axioma_service_url}/api/v1/sources/search"
@@ -63,36 +80,30 @@ class AxiomaService:
             params["name"] = name
         if country:
             params["country"] = country
-        resp = await http_client.request("GET", url, params=params)
-        return resp.json()
+        return await self._request_json("GET", url, params=params)
 
     async def get_countries(self) -> dict:
         url = f"{settings.axioma_service_url}/api/v1/sources/countries"
-        resp = await http_client.request("GET", url)
-        return resp.json()
+        return await self._request_json("GET", url)
 
     async def search_country(self, name: str) -> dict:
         url = f"{settings.axioma_service_url}/api/v1/sources/countries/search"
-        resp = await http_client.request("GET", url, params={"name": name})
-        return resp.json()
+        return await self._request_json("GET", url, params={"name": name})
     
     async def get_favorites(self, page: int, token) -> dict:
         url = f"{settings.axioma_service_url}/api/v1/articles/favorites"
         headers = {"Authorization": f"Bearer {token}"}
-        resp = await http_client.request("GET", url, params={"page": page}, headers=headers)
-        return resp.json()
+        return await self._request_json("GET", url, params={"page": page}, headers=headers)
     
     async def add_favorite(self, newFavorite: NewsFavoritesCoreRequest, token: str) -> dict:
         url = f"{settings.auth_service_url}/api/v1/favorite-news"
         headers = {"Authorization": f"Bearer {token}"}
-        resp = await http_client.request("POST", url, json=newFavorite.model_dump(), headers=headers)
-        return resp.json()
+        return await self._request_json("POST", url, json=newFavorite.model_dump(), headers=headers)
     
     async def delete_favorite(self, newFavorite: NewsFavoritesCoreRequest, token: str) -> dict:
         url = f"{settings.auth_service_url}/api/v1/favorite-news"
         headers = {"Authorization": f"Bearer {token}"}
-        resp = await http_client.request("DELETE", url, json=newFavorite.model_dump(),  headers=headers)
-        return resp.json()
+        return await self._request_json("DELETE", url, json=newFavorite.model_dump(), headers=headers)
     
     async def get_interests(self, token: str) -> dict:
         """
@@ -100,8 +111,7 @@ class AxiomaService:
         """
         url = f"{settings.auth_service_url}/api/v1/interests-user"
         headers = {"Authorization": f"Bearer {token}"}
-        resp = await http_client.request("GET", url, headers=headers)
-        return resp.json()
+        return await self._request_json("GET", url, headers=headers)
     
     async def add_interest(self, keyword: str, token: str) -> dict:
         """
@@ -110,8 +120,7 @@ class AxiomaService:
         url = f"{settings.auth_service_url}/api/v1/interests-user"
         headers = {"Authorization": f"Bearer {token}"}
         params = {"keyword": keyword}
-        resp = await http_client.request("POST", url, params=params, headers=headers)
-        return resp.json()
+        return await self._request_json("POST", url, params=params, headers=headers)
     
     async def get_recommended_articles(self) -> dict:
         """
@@ -119,24 +128,21 @@ class AxiomaService:
         Retorna 5 artículos aleatorios que se refrescan en cada petición.
         """
         url = f"{settings.axioma_service_url}/api/v1/articles/recommended"
-        resp = await http_client.request("GET", url)
-        return resp.json()
+        return await self._request_json("GET", url)
     
     async def get_source_by_id(self, source_id: int) -> dict:
         """
         Obtiene una fuente específica por su ID.
         """
         url = f"{settings.axioma_service_url}/api/v1/sources/{source_id}"
-        resp = await http_client.request("GET", url)
-        return resp.json()
+        return await self._request_json("GET", url)
     
     async def get_country_by_id(self, country_id: int) -> dict:
         """
         Obtiene un país específico por su ID.
         """
         url = f"{settings.axioma_service_url}/api/v1/sources/countries/{country_id}"
-        resp = await http_client.request("GET", url)
-        return resp.json()
+        return await self._request_json("GET", url)
     
     async def search_articles_by_source(
         self,
@@ -161,8 +167,7 @@ class AxiomaService:
 
         params = {k: v for k, v in params.items() if v is not None}
 
-        resp = await http_client.request("GET", url, params=params)
-        return resp.json()
+        return await self._request_json("GET", url, params=params)
 
     async def get_interests_by_interest(
         self,
@@ -183,8 +188,7 @@ class AxiomaService:
         }
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
-        resp = await http_client.request("GET", url, params=params)
-        return resp.json()
+        return await self._request_json("GET", url, params=params)
 
     async def get_analysis(
         self,
@@ -201,8 +205,7 @@ class AxiomaService:
             "interval": interval,
             "unit": unit
         }
-        resp = await http_client.request("GET", url, params=params)
-        return resp.json()
+        return await self._request_json("GET", url, params=params)
     
     async def get_sentiment_counts_data_analysis(
         self,
@@ -227,8 +230,7 @@ class AxiomaService:
         if query is not None:
             params["query"] = query
 
-        resp = await http_client.request("GET", url, params=params)
-        return resp.json()
+        return await self._request_json("GET", url, params=params)
     
     async def update_interests(self, interests: list[str], token: str) -> dict:
         """
@@ -237,8 +239,7 @@ class AxiomaService:
         url = f"{settings.auth_service_url}/api/v1/interests-user"
         headers = {"Authorization": f"Bearer {token}"}
         payload = {"interests": interests}
-        resp = await http_client.request("PUT", url, json=payload, headers=headers)
-        return resp.json()
+        return await self._request_json("PUT", url, json=payload, headers=headers)
     
     async def consult_article_stream(
         self,
