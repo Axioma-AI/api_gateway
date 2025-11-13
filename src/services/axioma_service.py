@@ -210,7 +210,7 @@ class AxiomaService:
         value: Optional[str] = None,
     ) -> dict:
         """
-        Llama al endpoint /api/v1/analysis/data-analysis/sentiments del servicio Axioma.
+        Llama al endpoint /api/v1/data-analysis/sentiments del servicio Axioma.
 
         - scope: 'day' | 'month' | 'year'
         - value (opcional):
@@ -219,7 +219,7 @@ class AxiomaService:
             * year  → 'yyyy'
           Si es None, el backend usa la fecha actual.
         """
-        url = f"{settings.axioma_service_url}/api/v1/analysis/data-analysis/sentiments"
+        url = f"{settings.axioma_service_url}/api/v1/data-analysis/sentiments"
         params: dict[str, str] = {"scope": scope}
         if value is not None:
             params["value"] = value
@@ -274,3 +274,4 @@ class AxiomaService:
         except Exception as e:
             err = {"error": f"Gateway SSE proxy error: {str(e)}"}
             yield f"data: {json.dumps(err)}\n\n".encode("utf-8")
+
