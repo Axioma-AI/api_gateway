@@ -204,6 +204,29 @@ class AxiomaService:
         resp = await http_client.request("GET", url, params=params)
         return resp.json()
     
+    async def get_sentiment_counts_data_analysis(
+        self,
+        scope: str,
+        value: Optional[str] = None,
+    ) -> dict:
+        """
+        Llama al endpoint /api/v1/analysis/data-analysis/sentiments del servicio Axioma.
+
+        - scope: 'day' | 'month' | 'year'
+        - value (opcional):
+            * day   → 'dd/mm/yyyy'
+            * month → 'mm/yyyy'
+            * year  → 'yyyy'
+          Si es None, el backend usa la fecha actual.
+        """
+        url = f"{settings.axioma_service_url}/api/v1/analysis/data-analysis/sentiments"
+        params: dict[str, str] = {"scope": scope}
+        if value is not None:
+            params["value"] = value
+
+        resp = await http_client.request("GET", url, params=params)
+        return resp.json()
+    
     async def update_interests(self, interests: list[str], token: str) -> dict:
         """
         Actualiza los intereses del usuario autenticado.
