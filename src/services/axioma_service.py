@@ -208,6 +208,7 @@ class AxiomaService:
         self,
         scope: str,
         value: Optional[str] = None,
+        query: Optional[str] = None,
     ) -> dict:
         """
         Llama al endpoint /api/v1/data-analysis/sentiments del servicio Axioma.
@@ -223,6 +224,8 @@ class AxiomaService:
         params: dict[str, str] = {"scope": scope}
         if value is not None:
             params["value"] = value
+        if query is not None:
+            params["query"] = query
 
         resp = await http_client.request("GET", url, params=params)
         return resp.json()

@@ -158,6 +158,12 @@ async def get_sentiment_counts_data_analysis_protected(
             "Si no se envía, se usa la fecha actual."
         ),
     ),
+    query: str = Query(
+        ...,
+        description="Palabra clave para buscar en las noticias (obligatoria)",
+        min_length=1,
+        max_length=100,
+    ),
     token: str = Depends(require_token),
 ):
     """
@@ -166,6 +172,7 @@ async def get_sentiment_counts_data_analysis_protected(
     return await service.get_sentiment_counts_data_analysis(
         scope=scope,
         value=value,
+        query=query,
     )
 
 # =====================================================================
@@ -199,6 +206,12 @@ async def get_sentiment_counts_data_analysis_public(
             "Si no se envía, se usa la fecha actual."
         ),
     ),
+    query: str = Query(
+        ...,
+        description="Palabra clave para buscar en las noticias (obligatoria)",
+        min_length=1,
+        max_length=100,
+    ),
 ):
     """
     Endpoint PÚBLICO para data-analysis/sentiments.
@@ -206,4 +219,5 @@ async def get_sentiment_counts_data_analysis_public(
     return await service.get_sentiment_counts_data_analysis(
         scope=scope,
         value=value,
+        query=query,
     )
