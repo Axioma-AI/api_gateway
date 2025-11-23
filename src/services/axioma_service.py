@@ -278,4 +278,47 @@ class AxiomaService:
         except Exception as e:
             err = {"error": f"Gateway SSE proxy error: {str(e)}"}
             yield f"data: {json.dumps(err)}\n\n".encode("utf-8")
+        
+    async def consult_multiple_articles_stream(
+        self,
+        chat_request,  # MultipleArticlesChatRequest
+        token: str,
+    ) -> AsyncIterator[bytes]:
+        """
+        Proxy streaming SSE hacia el servicio Axioma para consulta multi-artículo.
+        Devuelve bytes listos para StreamingResponse (líneas terminadas en '\n').
+        """
+        url = f"{settings.axioma_service_url}/api/v1/articles/consult"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "text/event-stream",
+            "Cache-Control": "no-cache",
+        }
+
+        try:
+            first = True
+            async for status, line in http_client.stream(
+                "POST",
+                url,
+                headers=headers,
+                json=chat_request.model_dump(),
+                timeout=None,  # importante para SSE
+            ):
+                if first:
+                    first = False
+                    if status is not None and status != 200:
+                        err = {"error": "Upstream error", "status": status}
+                        yield f"data: {json.dumps(err)}\n\n".encode("utf-8")
+                        return
+                    continue
+
+                if line is None:
+                    continue
+
+                # line ya viene tipo: "data: {...}" o "data: [DONE]"
+                yield (line + "\n").encode("utf-8")
+
+        except Exception as e:
+            err = {"error": f"Gateway SSE proxy error: {str(e)}"}
+            yield f"data: {json.dumps(err)}\n\n".encode("utf-8")
 
