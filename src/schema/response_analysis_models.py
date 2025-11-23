@@ -155,3 +155,56 @@ class YearSentimentResponseModel(BaseModel):
             ]
         }
     })
+
+class Last30DaysSentimentResponseModel(BaseModel):
+    from_date: str  # Fecha inicial (YYYY-MM-DD)
+    to_date: str    # Fecha final (YYYY-MM-DD)
+    days: List[DaySentimentResponseModel]
+    total_news: int
+    positive_sentiment_score: float
+    negative_sentiment_score: float
+
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "from_date": "2025-10-23",
+            "to_date": "2025-11-21",
+            "days": [
+                {
+                    "date": "2025-11-21",
+                    "sentiment_counts": {
+                        "very_positive": 5,
+                        "positive": 20,
+                        "neutral": 15,
+                        "negative": 8,
+                        "very_negative": 2,
+                        "unknown": 1
+                    },
+                    "total_news": 51,
+                    "positive_sentiment_score": 0.61,
+                    "negative_sentiment_score": 0.39
+                },
+                {
+                    "date": "2025-11-20",
+                    "sentiment_counts": {
+                        "very_positive": 4,
+                        "positive": 18,
+                        "neutral": 12,
+                        "negative": 10,
+                        "very_negative": 3,
+                        "unknown": 2
+                    },
+                    "total_news": 49,
+                    "positive_sentiment_score": 0.56,
+                    "negative_sentiment_score": 0.44
+                }
+            ],
+            "total_news": 35,
+            "positive_sentiment_score": 0.3984875715,
+            "negative_sentiment_score": 0.6015124285
+        }
+    })
+
+class ArticleIDsPageResponseModel(BaseModel):
+    ids: List[int] = Field(default_factory=list, description="Lista de IDs de news_core")
+    current_page: int = Field(..., example=1, description="Página actual")
+    total_pages: int = Field(..., example=5, description="Total de páginas para el filtro aplicado")

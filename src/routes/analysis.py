@@ -3,7 +3,7 @@ from typing import Union, Optional
 
 from src.dependencies.auth import require_token
 from src.services.axioma_service import AxiomaService
-from src.schema.response_analysis_models import AnalysisResponseModel, DaySentimentResponseModel, ErrorResponseModel, MonthSentimentResponseModel, YearSentimentResponseModel
+from src.schema.response_analysis_models import AnalysisResponseModel, ArticleIDsPageResponseModel, DaySentimentResponseModel, ErrorResponseModel, Last30DaysSentimentResponseModel, MonthSentimentResponseModel, YearSentimentResponseModel
 
 router = APIRouter(
     prefix="/gateway/analysis",
@@ -221,3 +221,65 @@ async def get_sentiment_counts_data_analysis_public(
         value=value,
         query=query,
     )
+
+
+@router.get(
+    "/public/articles/search/ids",
+    response_model=ArticleIDsPageResponseModel,
+    summary="[Público] Buscar IDs de noticias por texto y rango de fechas",
+    description=(
+        "Proxy hacia Axioma Service. Devuelve IDs (news_core.id) con paginación. "
+        "Filtra por fechas y luego busca por texto. NO requiere token."
+    ),
+)
+async def search_article_ids_public(
+    query: str = Query(
+        ...,
+        description="Texto a buscar en título o contenido (modo booleano)",
+        min_length=1,
+        max_length=200,
+    ),
+    page: int = Query(
+        default=1,
+        ge=1,
+        description="Número de página (100 resultados por página)",
+    ),
+    start_date: Optional[str] = Query(
+        default=None,
+        description="Fecha de inicio (YYYY-MM-DD o dd/mm/yyyy)",
+    ),
+    end_date: Optional[str] = Query(
+        default=None,
+        description="Fecha de fin (YYYY-MM-DD o dd/mm/yyyy)",
+    ),
+):
+    return await service.search_article_ids(
+        query=query,
+        page=page,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+
+# =====================================================================
+# DATA-ANALYSIS / LAST 30 DAYS: VERSION PÚBLICA
+# =====================================================================
+@router.get(
+    "/public/data-analysis/sentiments/last-30-days",
+    response_model=Last30DaysSentimentResponseModel,
+    summary="[Público] Sentimientos de los últimos 30 días",
+    description=(
+        "Proxy hacia Axioma Service. Devuelve día por día los conteos de "
+        "noticias por sentimiento y puntajes positivo/negativo de los últimos 30 días. "
+        "NO requiere token."
+    ),
+)
+async def get_last_30_days_sentiments_public(
+    query: str = Query(
+        ...,
+        description="Palabra clave para buscar en las noticias (obligatoria)",
+        min_length=1,
+        max_length=100,
+    ),
+):
+    return await service.get_last_30_days_sentiments(query=query)

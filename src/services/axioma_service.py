@@ -322,3 +322,40 @@ class AxiomaService:
             err = {"error": f"Gateway SSE proxy error: {str(e)}"}
             yield f"data: {json.dumps(err)}\n\n".encode("utf-8")
 
+    async def search_article_ids(
+        self,
+        query: str,
+        *,
+        page: int = 1,
+        start_date: str | None = None,
+        end_date: str | None = None,
+    ) -> dict:
+        """
+        Proxy al endpoint:
+        GET /api/v1/articles/search/ids
+        Devuelve IDs y paginación.
+        """
+        url = f"{settings.axioma_service_url}/api/v1/articles/search/ids"
+        params: dict[str, object] = {
+            "query": query,
+            "page": page,
+        }
+        if start_date is not None:
+            params["start_date"] = start_date
+        if end_date is not None:
+            params["end_date"] = end_date
+
+        return await self._request_json("GET", url, params=params)
+
+    async def get_last_30_days_sentiments(
+        self,
+        query: str,
+    ) -> dict:
+        """
+        Proxy al endpoint:
+        GET /api/v1/data-analysis/sentiments/last-30-days
+        """
+        url = f"{settings.axioma_service_url}/api/v1/data-analysis/sentiments/last-30-days"
+        params = {"query": query}
+        return await self._request_json("GET", url, params=params)
+
