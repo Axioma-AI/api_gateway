@@ -13,7 +13,6 @@ from src.schema.article_models import (
     NewsFavoritesCoreRequest,
     UpdateFavoritesResponse
 )
-from src.schema.chat_request import MultipleArticlesChatRequest
 from src.services.axioma_service import AxiomaService
 
 router = APIRouter(
@@ -237,39 +236,6 @@ async def articles_ai_post(
     Versión POST para obtener artículos de IA (para listas grandes de IDs).
     """
     return await service.get_ai_articles_by_ids(request.ids)
-
-@router.post(
-    "/consult",
-    summary="[Protegido] Consultar múltiples artículos (SSE)",
-    description=(
-        "Recibe múltiples article_ids y un user_message, "
-        "y hace proxy streaming SSE hacia Axioma Service."
-    ),
-    response_class=StreamingResponse,
-)
-async def consult_multiple_articles_gateway(
-    request: MultipleArticlesChatRequest,
-    token: str = Depends(require_token),
-):
-    """
-    Gateway SSE proxy para consultar múltiples artículos.
-    """
-    # Validación mínima en gateway (opcional pero útil)
-    if not request.article_ids:
-        return StreamingResponse(
-            iter([b'data: {"error":"article_ids cannot be empty"}\n\n']),
-            media_type="text/event-stream",
-        )
-
-    return StreamingResponse(
-        service.consult_multiple_articles_stream(request, token),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-        },
-    )
 
 @router.post("/{article_id}/consult", response_class=StreamingResponse, summary="Consulta SSE de artículo (proxy)")
 async def consult_article_proxy(

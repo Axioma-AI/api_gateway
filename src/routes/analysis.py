@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, Query
 from typing import Union, Optional
+from fastapi.responses import StreamingResponse
 
+from src.schema.chat_request import MultipleArticlesChatRequest
 from src.dependencies.auth import require_token
 from src.services.axioma_service import AxiomaService
 from src.schema.response_analysis_models import AnalysisResponseModel, ArticleIDsPageResponseModel, DaySentimentResponseModel, ErrorResponseModel, Last30DaysSentimentResponseModel, MonthSentimentResponseModel, YearSentimentResponseModel
@@ -283,3 +285,37 @@ async def get_last_30_days_sentiments_public(
     ),
 ):
     return await service.get_last_30_days_sentiments(query=query)
+
+
+@router.post(
+    "/public/articles/consult",
+    summary="Consultar múltiples artículos (SSE)",
+    description=(
+        "Recibe múltiples article_ids y un user_message, "
+        "y hace proxy streaming SSE hacia Axioma Service."
+    ),
+    response_class=StreamingResponse,
+)
+async def consult_multiple_articles_gateway(
+    request: MultipleArticlesChatRequest,
+    token: str = Depends(require_token),
+):
+    """
+    Gateway SSE proxy para consultar múltiples artículos.
+    """
+    # Validación mínima en gateway (opcional pero útil)
+    if not request.article_ids:
+        return StreamingResponse(
+            iter([b'data: {"error":"article_ids cannot be empty"}\n\n']),
+            media_type="text/event-stream",
+        )
+
+    return StreamingResponse(
+        service.consult_multiple_articles_stream(request, token),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
