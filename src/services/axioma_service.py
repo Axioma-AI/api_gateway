@@ -282,7 +282,6 @@ class AxiomaService:
     async def consult_multiple_articles_stream(
         self,
         chat_request,  # MultipleArticlesChatRequest
-        token: str,
     ) -> AsyncIterator[bytes]:
         """
         Proxy streaming SSE hacia el servicio Axioma para consulta multi-artículo.
@@ -290,7 +289,6 @@ class AxiomaService:
         """
         url = f"{settings.axioma_service_url}/api/v1/articles/consult"
         headers = {
-            "Authorization": f"Bearer {token}",
             "Accept": "text/event-stream",
             "Cache-Control": "no-cache",
         }

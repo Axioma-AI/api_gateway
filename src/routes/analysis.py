@@ -297,8 +297,7 @@ async def get_last_30_days_sentiments_public(
     response_class=StreamingResponse,
 )
 async def consult_multiple_articles_gateway(
-    request: MultipleArticlesChatRequest,
-    token: str = Depends(require_token),
+    request: MultipleArticlesChatRequest
 ):
     """
     Gateway SSE proxy para consultar múltiples artículos.
@@ -311,7 +310,7 @@ async def consult_multiple_articles_gateway(
         )
 
     return StreamingResponse(
-        service.consult_multiple_articles_stream(request, token),
+        service.consult_multiple_articles_stream(request),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
