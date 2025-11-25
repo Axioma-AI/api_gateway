@@ -1,6 +1,6 @@
 from datetime import date
 import json
-from typing import Optional, AsyncIterator
+from typing import Optional, AsyncIterator, Tuple
 import httpx
 from fastapi import HTTPException
 
@@ -357,3 +357,37 @@ class AxiomaService:
         params = {"query": query}
         return await self._request_json("GET", url, params=params)
 
+
+    async def export_sentiments_excel(
+        self,
+        scope: str,
+        value: Optional[str],
+        query: str,
+    ) -> Tuple[bytes, dict]:
+        """
+        Proxy al endpoint:
+        GET /api/v1/data-analysis/sentiments/excel
+
+        Devuelve (contenido_bytes, headers) para que el gateway
+        pueda reenviar el archivo Excel.
+        """
+        url = f"{settings.axioma_service_url}/api/v1/data-analysis/sentiments/excel"
+        params: dict[str, str] = {
+            "scope": scope,
+            "query": query,
+        }
+        if value is not None:
+            params["value"] = value
+
+        try:
+            resp = await http_client.request("GET", url, params=params)
+            return resp.content, dict(resp.headers)
+        except httpx.HTTPStatusError as exc:
+            code = exc.response.status_code
+            try:
+                detail = exc.response.json()
+            except Exception:
+                detail = exc.response.text
+            raise HTTPException(status_code=code, detail=detail)
+        except httpx.RequestError as exc:
+            raise HTTPException(status_code=502, detail=str(exc))

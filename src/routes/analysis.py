@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from typing import Union, Optional
 from fastapi.responses import StreamingResponse
 
@@ -42,6 +42,25 @@ data_analysis_sentiments_responses = {
     },
     400: {
         "description": "Parámetros inválidos",
+        "model": ErrorResponseModel,
+    },
+    500: {
+        "description": "Error interno del servidor",
+        "model": ErrorResponseModel,
+    },
+}
+
+
+data_analysis_sentiments_excel_responses = {
+    200: {
+        "description": "Archivo Excel generado con los conteos por sentimiento",
+    },
+    400: {
+        "description": "Parámetros inválidos",
+        "model": ErrorResponseModel,
+    },
+    422: {
+        "description": "Validación fallida",
         "model": ErrorResponseModel,
     },
     500: {
@@ -316,5 +335,61 @@ async def consult_multiple_articles_gateway(
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
             "X-Accel-Buffering": "no",
+        },
+    )
+
+@router.get(
+    "/public/data-analysis/sentiments/excel",
+    responses=data_analysis_sentiments_excel_responses,
+    summary="[Público] Exportar sentimientos (day/month/year) a Excel",
+    description=(
+        "Proxy hacia Axioma Service. Retorna un archivo Excel con los conteos por sentimiento "
+        "y puntajes para day (dd/mm/yyyy), month (mm/yyyy) o year (yyyy). "
+        "Usa los mismos filtros que el endpoint JSON. NO requiere token."
+    ),
+)
+async def export_sentiments_excel_public(
+    scope: str = Query(
+        ...,
+        description="Nivel de agregación: day, month o year",
+        regex="^(day|month|year)$",
+    ),
+    value: Union[str, None] = Query(
+        default=None,
+        description=(
+            "Valor del filtro. Formatos: day → dd/mm/yyyy, month → mm/yyyy, year → yyyy. "
+            "Si no se envía, se usa la fecha actual."
+        ),
+    ),
+    query: str = Query(
+        ...,
+        description="Palabra clave para buscar en las noticias (obligatoria)",
+        min_length=1,
+        max_length=100,
+    ),
+):
+    # Simplemente hacemos proxy: la validación de fechas y generación del Excel
+    # la hace el servicio Axioma.
+    content, upstream_headers = await service.export_sentiments_excel(
+        scope=scope,
+        value=value,
+        query=query,
+    )
+
+    # Tomamos Content-Type y Content-Disposition del upstream si existen
+    content_type = upstream_headers.get(
+        "content-type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    disposition = upstream_headers.get(
+        "content-disposition",
+        'attachment; filename="sentiments_report.xlsx"',
+    )
+
+    return Response(
+        content=content,
+        media_type=content_type,
+        headers={
+            "Content-Disposition": disposition,
         },
     )
