@@ -8,10 +8,12 @@ class NewsHistoryModel(BaseModel):
 class NewsPerceptionModel(BaseModel):
     date: str
     positive_sentiment_score: float
+    neutral_sentiment_score: float
     negative_sentiment_score: float
 
 class GeneralPerceptionModel(BaseModel):
     positive_sentiment_score: float
+    neutral_sentiment_score: float
     negative_sentiment_score: float
 
 class AnalysisResponseModel(BaseModel):
@@ -28,18 +30,21 @@ class AnalysisResponseModel(BaseModel):
         "example": {
             "source_query": "ganaderia",
             "news_history": [
-                {"date": "2024-02-15", "news_count": 15},
-                {"date": "2024-04-02", "news_count": 20}
+                {"date": "2024-02-15", "news_count": 8},
+                {"date": "2024-02-16", "news_count": 12},
+                {"date": "2024-02-17", "news_count": 5}
             ],
             "news_perception": [
                 {
-                    "date": "2024-02-15",
+                    "date": "2024-02-01",
                     "positive_sentiment_score": 0.5,
+                    "neutral_sentiment_score": 0.2,
                     "negative_sentiment_score": 0.3
                 },
                 {
-                    "date": "2024-04-02",
+                    "date": "2024-04-01",
                     "positive_sentiment_score": 0.7,
+                    "neutral_sentiment_score": 0.1,
                     "negative_sentiment_score": 0.2
                 }
             ],
@@ -49,6 +54,7 @@ class AnalysisResponseModel(BaseModel):
             "historic_interval_unit": "months",
             "general_perception": {
                 "positive_sentiment_score": 0.6,
+                "neutral_sentiment_score": 0.1,
                 "negative_sentiment_score": 0.4
             }
         }
@@ -77,6 +83,7 @@ class DaySentimentResponseModel(BaseModel):
     sentiment_counts: SentimentCountsModel
     total_news: int
     positive_sentiment_score: float
+    neutral_sentiment_score: float
     negative_sentiment_score: float
 
     model_config = ConfigDict(json_schema_extra={
@@ -92,6 +99,7 @@ class DaySentimentResponseModel(BaseModel):
             },
             "total_news": 51,
             "positive_sentiment_score": 0.61,
+            "neutral_sentiment_score": 0.29,
             "negative_sentiment_score": 0.39
         }
     })
@@ -102,6 +110,7 @@ class MonthSentimentResponseModel(BaseModel):
     sentiment_counts: SentimentCountsModel
     total_news: int
     positive_sentiment_score: float
+    neutral_sentiment_score: float
     negative_sentiment_score: float
 
     model_config = ConfigDict(json_schema_extra={
@@ -117,6 +126,7 @@ class MonthSentimentResponseModel(BaseModel):
             },
             "total_news": 335,
             "positive_sentiment_score": 0.57,
+            "neutral_sentiment_score": 0.27,
             "negative_sentiment_score": 0.43
         }
     })
@@ -127,6 +137,7 @@ class YearMonthSentimentModel(BaseModel):
     sentiment_counts: SentimentCountsModel
     total_news: int
     positive_sentiment_score: float
+    neutral_sentiment_score: float
     negative_sentiment_score: float
 
 
@@ -162,6 +173,7 @@ class Last30DaysSentimentResponseModel(BaseModel):
     days: List[DaySentimentResponseModel]
     total_news: int
     positive_sentiment_score: float
+    neutral_sentiment_score: float
     negative_sentiment_score: float
 
     model_config = ConfigDict(json_schema_extra={
@@ -181,6 +193,7 @@ class Last30DaysSentimentResponseModel(BaseModel):
                     },
                     "total_news": 51,
                     "positive_sentiment_score": 0.61,
+                    "neutral_sentiment_score": 0.29,
                     "negative_sentiment_score": 0.39
                 },
                 {
@@ -195,11 +208,13 @@ class Last30DaysSentimentResponseModel(BaseModel):
                     },
                     "total_news": 49,
                     "positive_sentiment_score": 0.56,
+                    "neutral_sentiment_score": 0.24,
                     "negative_sentiment_score": 0.44
                 }
             ],
             "total_news": 35,
             "positive_sentiment_score": 0.3984875715,
+            "neutral_sentiment_score": 0.2000000000,
             "negative_sentiment_score": 0.6015124285
         }
     })
